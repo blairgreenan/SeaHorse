@@ -49,7 +49,7 @@ T2$Time <- as.POSIXct((as.numeric(T2$Time) - 719529)*86400, origin = "1970-01-01
 # Plot the data
 dev.new()
 dev.new()
-ggplot(T2) + geom_contour_filled(aes(x=Time, y=Depth, z=Temperature), na.rm = TRUE, bins = 10) + scale_y_reverse() + scale_color_cmocean(name="haline") + labs(x=NULL, y="Depth (m)")
+ggplot(T2) + geom_contour_filled(aes(x=Time, y=Depth, z=Temperature), na.rm = TRUE, bins = 10) + scale_y_reverse() + scale_fill_cmocean(name="thermal", discrete = TRUE) + labs(x=NULL, y="Depth (m)")
 
 
 # create a data frame with the CTD data
