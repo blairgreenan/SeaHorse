@@ -127,7 +127,8 @@ pFluorescence <- ggplot(tidy_SH, aes(Time, Pressure)) +
   scale_fill_cmocean(name = "algae") + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("Chlorophyll (mg m"^"-3"*")")))
+  guides(fill = guide_colourbar(title=expression("Chlorophyll (mg m"^"-3"*")"))) + 
+  scale_x_continuous(labels = NULL)
 
 # O2_Percent_Sat plot
 pO2_Percent_Sat <- ggplot(tidy_SH, aes(Time, Pressure)) + 
@@ -143,7 +144,7 @@ pO2_Concentration <- ggplot(tidy_SH, aes(Time, Pressure)) +
   scale_fill_cmocean(name = "dense", limits=c(5.5,8.5)) + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("O2_Concentration (mL L"^"-1"*")")))
+  guides(fill = guide_colourbar(title=expression("Oxygen (mL L"^"-1"*")")))
 
 # Potential_Temperature plot
 pPotential_Temperature <- ggplot(tidy_SH, aes(Time, Pressure)) + 
@@ -159,7 +160,8 @@ pSalinity <- ggplot(tidy_SH, aes(Time, Pressure)) +
   scale_fill_cmocean(name = "haline") + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("Salinity")))
+  guides(fill = guide_colourbar(title=expression("Salinity        "))) + 
+  scale_x_continuous(labels = NULL)
 
 # Sound_Velocity plot
 pSound_Velocity <- ggplot(tidy_SH, aes(Time, Pressure)) + 
@@ -186,6 +188,10 @@ pBuoyancy_Freq <- ggplot(tidy_SH, aes(Time, Pressure)) +
   labs(x=NULL,y="Depth (m)") + 
   guides(fill = guide_colourbar(title=expression("Buoyancy_Freq (cycles h"^"-1"*")")))
 
+# facet plot using patchwork package
+pTmp/pSalinity/pDensity/pFluorescence/pO2_Concentration
 
+# save plot
+ggsave(filename = "SH_CTD.png", device = "png", scale = 1.0, width = 6, height = 10, units = "in", dpi = 1200)
 
 
