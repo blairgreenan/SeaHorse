@@ -18,7 +18,7 @@ library(interp)
 library(patchwork)
 
 # Toggle whether to load data from scratch (i.e., from the Matlab .mat file)
-From_Scratch <- FALSE
+From_Scratch <- TRUE
 
 if (From_Scratch){
   # load CTD Data from the .mat file
@@ -48,11 +48,32 @@ if (From_Scratch){
     # Convert Matlab datenum to POSIX compliant date/time
     Tme_posixct <- as.POSIXct((as.numeric(Tme) - 719529)*86400, origin = "1970-01-01", tz = "UTC")
     
+    # Compute the mixed layer depth based on temperature criterion
+    # first subset the profile to remove the upper 10m of the water column
+    Press_subset <- subset(Press, Press>10 & Press<190)
+    Tmp_subset <- subset(Tmp, Press>10 & Press<190)
+    SigmaT_subset <- subset(SigmaT, Press>10 & Press<190)
+    criterion_T <- 0.1
+    criterion_rho <- 0.125
+    inMLD_T <- abs(Tmp_subset[1]-Tmp_subset) < criterion_T
+    MLDindex_T <- which.min(inMLD_T)
+    MLDpressure_T <- Press_subset[MLDindex_T]
+    inMLD_rho <- abs(SigmaT_subset[1]-SigmaT_subset) < criterion_rho
+    MLDindex_rho <- which.min(inMLD_rho)
+    MLDpressure_rho <- Press_subset[MLDindex_rho]
+    # there seem to be cases where the criterion is not meet through the whole water column
+    if (MLDpressure_rho>150){
+      MLDpressure_rho <- NA
+    }
+    
     if (ii == 1) {
       tidy_SH <- bind_cols(Tme_posixct,Cond,SigmaT,DescentRate,Fluor,O2PercentSat,O2Conc,PotTemp,Press,Dpth,Sal,SoundVel,Tmp,V0,V1,BF2,BF)
+      tidy_MLD <- bind_cols(Tme_posixct,MLDpressure_T,MLDpressure_rho)
     } else {
       tidy_tmp <- bind_cols(Tme_posixct,Cond,SigmaT,DescentRate,Fluor,O2PercentSat,O2Conc,PotTemp,Press,Dpth,Sal,SoundVel,Tmp,V0,V1,BF2,BF)
       tidy_SH <- bind_rows(tidy_SH, tidy_tmp)
+      tidy_MLD_tmp <- bind_cols(Tme_posixct,MLDpressure_T,MLDpressure_rho)
+      tidy_MLD <- bind_rows(tidy_MLD, tidy_MLD_tmp)
     }
     
   }
@@ -74,25 +95,41 @@ if (From_Scratch){
   names(tidy_SH)[16] <- "Buoyancy_Freq_2"
   names(tidy_SH)[17] <- "Buoyancy_Freq"
   
+  names(tidy_MLD)[1] <- "Time"
+  names(tidy_MLD)[2] <- "Pressure_T"
+  names(tidy_MLD)[3] <- "Pressure_rho"
   
   
   # Save the data to a RData file
-  save(tidy_SH, file = "SeaHorse_CTD_data.RData")
+  save(tidy_SH, tidy_MLD, file = "SeaHorse_CTD_data.RData")
   
 } else {
   load("SeaHorse_CTD_data.RData")
 }
 
+# Estimate the mixed layer depth
+
 ###### Plotting Section ###############
 
 # Temperature plot
-pTmp <- ggplot(tidy_SH, aes(Time, Pressure)) + 
-  geom_tile(aes(fill = Temperature)) + 
-  scale_fill_cmocean(name = "thermal") + 
-  scale_y_reverse() + 
-  labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("Temperature (\u00B0C)"))) + 
-  scale_x_continuous(labels = NULL)
+#pTmp <- ggplot(tidy_SH, aes(Time, Pressure)) + 
+#  geom_tile(aes(fill = Temperature)) + 
+#  scale_fill_cmocean(name = "thermal") + 
+#  scale_y_reverse() + 
+#  labs(x=NULL,y="Depth (m)") + 
+#  guides(fill = guide_colourbar(title=expression("Temperature (\u00B0C)"))) + 
+#  scale_x_continuous(labels = NULL)
+
+pTmp <- ggplot() +
+  geom_tile(data=tidy_SH, aes(Time, Pressure, fill = Temperature)) +
+  scale_fill_cmocean(name = "thermal") +
+  scale_y_reverse() +
+  labs(x=NULL,y="Depth (m)") +
+  guides(fill = guide_colourbar(title=expression("Temperature (\u00B0C)"))) +
+  scale_x_continuous(labels = NULL) +
+  geom_smooth(data=tidy_MLD, aes(Time,Pressure_T), method="loess", se=FALSE, span=0.1, colour="white") +
+  geom_point(data=tidy_MLD, aes(Time,Pressure_T))
+
 
 # Conductivity plot
 pCond <- ggplot(tidy_SH, aes(Time, Pressure)) + 
@@ -104,13 +141,16 @@ pCond <- ggplot(tidy_SH, aes(Time, Pressure)) +
   scale_x_continuous(labels = NULL)
 
 # Density plot
-pDensity <- ggplot(tidy_SH, aes(Time, Pressure)) + 
-  geom_tile(aes(fill = Density)) + 
+pDensity <- ggplot() + 
+  geom_tile(data=tidy_SH, aes(Time, Pressure, fill = Density)) + 
   scale_fill_cmocean(name = "dense") + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
   guides(fill = guide_colourbar(title=expression("Density (kg m"^"-3"*")"))) + 
-  scale_x_continuous(labels = NULL)
+  scale_x_continuous(labels = NULL) +
+  geom_smooth(data=tidy_MLD, aes(Time,Pressure_rho), method="loess", se=FALSE, span=0.1, colour="white") +
+  geom_point(data=tidy_MLD, aes(Time,Pressure_rho))
+
 
 # Descent Rate plot
 pDescent_Rate <- ggplot(tidy_SH, aes(Time, Pressure)) + 
