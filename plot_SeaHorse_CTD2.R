@@ -18,7 +18,7 @@ library(interp)
 library(patchwork)
 
 # Toggle whether to load data from scratch (i.e., from the Matlab .mat file)
-From_Scratch <- TRUE
+From_Scratch <- FALSE
 
 if (From_Scratch){
   # load CTD Data from the .mat file
@@ -48,8 +48,9 @@ if (From_Scratch){
     # Convert Matlab datenum to POSIX compliant date/time
     Tme_posixct <- as.POSIXct((as.numeric(Tme) - 719529)*86400, origin = "1970-01-01", tz = "UTC")
     
-    # Compute the mixed layer depth based on temperature criterion
-    # first subset the profile to remove the upper 10m of the water column
+    # Compute the mixed layer depth based on temperature and density criterion
+    # first subset the profile to remove the upper and lower 10m of the water column
+    # The following algorithm is based on D. Kelley (2018) p. 126-7
     Press_subset <- subset(Press, Press>10 & Press<190)
     Tmp_subset <- subset(Tmp, Press>10 & Press<190)
     SigmaT_subset <- subset(SigmaT, Press>10 & Press<190)
@@ -61,7 +62,7 @@ if (From_Scratch){
     inMLD_rho <- abs(SigmaT_subset[1]-SigmaT_subset) < criterion_rho
     MLDindex_rho <- which.min(inMLD_rho)
     MLDpressure_rho <- Press_subset[MLDindex_rho]
-    # there seem to be cases where the criterion is not meet through the whole water column
+    # there seem to be cases where the density criterion is not met through the whole water column
     if (MLDpressure_rho>150){
       MLDpressure_rho <- NA
     }
@@ -112,23 +113,32 @@ if (From_Scratch){
 ###### Plotting Section ###############
 
 # Temperature plot
-#pTmp <- ggplot(tidy_SH, aes(Time, Pressure)) + 
-#  geom_tile(aes(fill = Temperature)) + 
-#  scale_fill_cmocean(name = "thermal") + 
-#  scale_y_reverse() + 
-#  labs(x=NULL,y="Depth (m)") + 
-#  guides(fill = guide_colourbar(title=expression("Temperature (\u00B0C)"))) + 
-#  scale_x_continuous(labels = NULL)
+# Set flag for plotting ML depth based on temperature criterion
+# Note that the T criterion does not seem to work as well as the density
+# criterion, so I am not planning to present this
+Tflag <- FALSE
 
-pTmp <- ggplot() +
-  geom_tile(data=tidy_SH, aes(Time, Pressure, fill = Temperature)) +
-  scale_fill_cmocean(name = "thermal") +
-  scale_y_reverse() +
-  labs(x=NULL,y="Depth (m)") +
-  guides(fill = guide_colourbar(title=expression("Temperature (\u00B0C)"))) +
-  scale_x_continuous(labels = NULL) +
-  geom_smooth(data=tidy_MLD, aes(Time,Pressure_T), method="loess", se=FALSE, span=0.1, colour="white") +
-  geom_point(data=tidy_MLD, aes(Time,Pressure_T))
+if (Tflag) {
+  pTmp <- ggplot() +
+    geom_tile(data=tidy_SH, aes(Time, Pressure, fill = Temperature)) +
+    scale_fill_cmocean(name = "thermal") +
+    scale_y_reverse() +
+    labs(x=NULL,y="Depth (m)") +
+    guides(fill = guide_colourbar(title=expression("Temperature (\u00B0C)"))) +
+    scale_x_continuous(labels = NULL) +
+    geom_smooth(data=tidy_MLD, aes(Time,Pressure_T), method="loess", se=FALSE, span=0.1, colour="white") +
+    geom_point(data=tidy_MLD, aes(Time,Pressure_T))
+  
+} else {
+  pTmp <- ggplot(tidy_SH, aes(Time, Pressure)) + 
+    geom_tile(aes(fill = Temperature)) + 
+    scale_fill_cmocean(name = "thermal") + 
+    scale_y_reverse() + 
+    labs(x=NULL,y="Depth (m)") + 
+    guides(fill = guide_colourbar(title=expression("Temperature (\u00B0C)"))) + 
+    scale_x_continuous(labels = NULL)
+  
+}
 
 
 # Conductivity plot
@@ -148,8 +158,10 @@ pDensity <- ggplot() +
   labs(x=NULL,y="Depth (m)") + 
   guides(fill = guide_colourbar(title=expression("Density (kg m"^"-3"*")"))) + 
   scale_x_continuous(labels = NULL) +
-  geom_smooth(data=tidy_MLD, aes(Time,Pressure_rho), method="loess", se=FALSE, span=0.1, colour="white") +
-  geom_point(data=tidy_MLD, aes(Time,Pressure_rho))
+  geom_smooth(data=tidy_MLD, aes(Time,Pressure_rho), method="loess", se=FALSE, span=0.1, colour="white") 
+# could add dots for individual profiles but this clutters the plot
+# +
+#  geom_point(data=tidy_MLD, aes(Time,Pressure_rho))
 
 
 # Descent Rate plot
@@ -232,6 +244,6 @@ pBuoyancy_Freq <- ggplot(tidy_SH, aes(Time, Pressure)) +
 pTmp/pSalinity/pDensity/pFluorescence/pO2_Concentration
 
 # save plot
-ggsave(filename = "SH_CTD.png", device = "png", scale = 1.0, width = 6, height = 10, units = "in", dpi = 1200)
+ggsave(filename = "SH_CTD.png", device = "png", scale = 1.5, width = 6, height = 10, units = "in", dpi = 1200)
 
 
