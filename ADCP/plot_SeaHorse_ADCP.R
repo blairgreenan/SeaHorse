@@ -65,12 +65,40 @@ DPL6_time <- DPL6@data$time
 DPL6_tibble <- bind_cols(DPL6_time, DPL6_rmean_east, DPL6_rmean_north)
 DPL6_tibble <- rename(DPL6_tibble,Time=1,East=2,North=3)
 
+# Estimate the depth-averaged currents
+DPL_east <- (DPL5_tibble$East+DPL6_tibble$East)/2
+DPL_north <- (DPL5_tibble$North+DPL6_tibble$North)/2
 
+# Tidal model reults
+tide_u <- readMat("ross_bank_top_u.mat")
+tide_v <- readMat("ross_bank_top_v.mat")
+Tme_posixct_u <- as.POSIXct((as.numeric(tide_u$SerialDay) - 719529)*86400, origin = "1970-01-01", tz = "UTC")
+tide_u_df <- cbind(Tme_posixct_u, tide_u$TimeSeries[1,])
+tide_u_tibble <- as_tibble(tide_u_df)
+tide_u_tibble <- rename(tide_u_tibble,Time=1,East=2)
+tide_u_tibble$Time <- as.POSIXct(tide_u_tibble$Time)
+tide_u_tibble$East <- (tide_u_tibble$East)/100  # convert from cm/s to m/s
+model_east <- ggplot(tide_u_tibble, aes(Time, East)) + 
+  geom_line() + 
+  scale_x_datetime(limits = c(as.POSIXct("2012-01-21 00:00:00"),as.POSIXct("2012-01-27 00:00:00")))
+# model_east
+Tme_posixct_v <- as.POSIXct((as.numeric(tide_v$SerialDay) - 719529)*86400, origin = "1970-01-01", tz = "UTC")
+tide_v_df <- cbind(Tme_posixct_v, tide_v$TimeSeries[1,])
+tide_v_tibble <- as_tibble(tide_v_df)
+tide_v_tibble <- rename(tide_v_tibble,Time=1,North=2)
+tide_v_tibble$Time <- as.POSIXct(tide_v_tibble$Time)
+tide_v_tibble$North <- (tide_v_tibble$North)/100  # convert from cm/s to m/s
+model_north <- ggplot(tide_v_tibble, aes(Time, North)) + 
+  geom_line() + 
+  scale_x_datetime(limits = c(as.POSIXct("2012-01-21 00:00:00"),as.POSIXct("2012-01-27 00:00:00")))
+# model_north
+
+####### Plots of the data ##################
 dev.new()
 ggplot() + geom_line(data=DPL5_tibble, aes(Time, East, color="red")) + 
   geom_line(data=DPL6_tibble, aes(Time, East, color="blue")) +
   labs(x=NULL,y="East (m/s)") + 
-  scale_color_discrete(name=NULL, labels=c("Upper","Lower"))
+  scale_color_discrete(name=NULL, labels=c("Lower","Upper"))
 # save plot
 ggsave(filename = "ADCP_East.png", device = "png", scale = 1.5, width = 6, height = 10, units = "in", dpi = 1200)
 
@@ -79,10 +107,40 @@ dev.new()
 ggplot() + geom_line(data=DPL5_tibble, aes(Time, North, color="red")) + 
   geom_line(data=DPL6_tibble, aes(Time, North, color="blue")) + 
   labs(x=NULL,y="North (m/s)") + 
-  scale_color_discrete(name=NULL, labels=c("Upper","Lower"))
+  scale_color_discrete(name=NULL, labels=c("Lower","Upper"))
 # save plot
 ggsave(filename = "ADCP_NOrth.png", device = "png", scale = 1.5, width = 6, height = 10, units = "in", dpi = 1200)
 
+dev.new()
+ggplot() + geom_line(data=DPL_east, aes(Time, East, color="red")) + 
+  geom_line(data=tide_u_tibble, aes(Time, East, color="blue")) +
+  labs(x=NULL,y="East (m/s)") + 
+  scale_color_discrete(name=NULL, labels=c("Model","ADCP")) +
+  scale_x_datetime(limits = c(as.POSIXct("2012-01-21 00:00:00"),as.POSIXct("2012-01-27 00:00:00")))
+
+dev.new()
+ggplot() + geom_line(data=DPL_north, aes(Time, East, color="red")) + 
+  geom_line(data=tide_u_tibble, aes(Time, East, color="blue")) +
+  labs(x=NULL,y="East (m/s)") + 
+  scale_color_discrete(name=NULL, labels=c("Model","ADCP")) +
+  scale_x_datetime(limits = c(as.POSIXct("2012-01-21 00:00:00"),as.POSIXct("2012-01-27 00:00:00")))
+
+# Plot tiled images of downward and upward looking ADCP results
+# East component
+dev.new()
+par(mfrow=c(2,1))
+plot(DPL5,which=1,zlim=c(-0.6,0.6))
+plot(DPL6,which=1,zlim=c(-0.6,0.6))
+# North component
+dev.new()
+par(mfrow=c(2,1))
+plot(DPL5,which=2,zlim=c(-0.6,0.6))
+plot(DPL6,which=2,zlim=c(-0.6,0.6))
+# Vertical component
+dev.new()
+par(mfrow=c(2,1))
+plot(DPL5,which=3,zlim=c(-0.1,0.1))
+plot(DPL6,which=3,zlim=c(-0.1,0.1))
 
 
 
