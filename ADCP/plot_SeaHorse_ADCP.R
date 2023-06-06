@@ -234,3 +234,6 @@ compare_east/compare_north
 ggsave(filename = "ADCP_model.png", device = "png", scale = 1.5, width = 6, height = 10, units = "in", dpi = 1200)
 
 
+############# Need to add a section on vertical shear
+
+
