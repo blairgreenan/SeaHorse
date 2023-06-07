@@ -208,11 +208,11 @@ model_north <- ggplot(tide_v_tibble, aes(Time, North)) +
   scale_x_datetime(limits = c(as.POSIXct("2012-01-21 00:00:00"),as.POSIXct("2012-01-27 00:00:00")))
 # model_north
 
-# Use dplyr::summarise to compute the depth-averaged mean velocit components
+# Use dplyr::summarise to compute the depth-averaged mean velocity components
 tidy_east_summary <- tidy_east_long_clipped %>% group_by(DateTime) %>% summarise(avg = mean(East, na.rm = TRUE))
 tidy_north_summary <- tidy_north_long_clipped %>% group_by(DateTime) %>% summarise(avg = mean(North, na.rm = TRUE))
 
-####### Plots of the data ##################
+####### Plots of the depth-averaged velocity data ##################
 compare_east <- ggplot() + 
   geom_line(data=tidy_east_summary, aes(DateTime,avg, color="red")) + 
   geom_line(data=tide_u_tibble, aes(Time, East, color="blue")) + 
@@ -231,9 +231,27 @@ compare_north <- ggplot() +
 # Use patchwork to plot results
 dev.new()
 compare_east/compare_north
-ggsave(filename = "ADCP_model.png", device = "png", scale = 1.5, width = 6, height = 10, units = "in", dpi = 1200)
-
+#ggsave(filename = "ADCP_model.png", device = "png", scale = 1.5, width = 6, height = 10, units = "in", dpi = 1200)
+#dev.off()
 
 ############# Need to add a section on vertical shear
 
+# Calculate the 4-m bin difference in the east and north velocity components
+# Results in an matrix with one less row
+# Need to do a transpose of the matrix for the diff function to work on the depth bins
+# The transport after the diff operation to return the matrix to its orignal form
+# Divide by 4 because that is the bin depth
+bind_east_shear <- t(diff(t(bind_east_clipped)))/4
+bind_north_shear <- t(diff(t(bind_north_clipped)))/4
+shear <- sqrt(bind_east_shear^2 + bind_north_shear^2)
+# Remove the bins where the two ADCPs overlap because these values distort the data
+shear[,23:25] <- NA
+# Just checking to see the range of the shear values
+max(shear, na.rm=TRUE)
+min(shear, na.rm=TRUE)
+# Plot the results
+# This does not provide any pattern for vertical shear so I think we should
+# not pursue this any further. The upward-looking ADCP is Likely to0 far off
+# the seabed to measure shear in the bottom boundary layer
+image(shear, zlim = c(0,0.01))
 
