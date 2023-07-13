@@ -124,7 +124,7 @@ if (Tflag) {
     scale_fill_cmocean(name = "thermal") +
     scale_y_reverse() +
     labs(x=NULL,y="Depth (m)") +
-    guides(fill = guide_colourbar(title=expression("Temperature (\u00B0C)"))) +
+    guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title=expression("Temperature (\u00B0C)"))) +
     scale_x_continuous(labels = NULL) +
     geom_smooth(data=tidy_MLD, aes(Time,Pressure_T), method="loess", se=FALSE, span=0.1, colour="white") +
     geom_point(data=tidy_MLD, aes(Time,Pressure_T))
@@ -135,7 +135,7 @@ if (Tflag) {
     scale_fill_cmocean(name = "thermal") + 
     scale_y_reverse() + 
     labs(x=NULL,y="Depth (m)") + 
-    guides(fill = guide_colourbar(title=expression("Temperature (\u00B0C)"))) + 
+    guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title=expression("Temperature (\u00B0C)"))) + 
     scale_x_continuous(labels = NULL)
   
 }
@@ -147,7 +147,7 @@ pCond <- ggplot(tidy_SH, aes(Time, Pressure)) +
   scale_fill_cmocean(name = "haline") + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("Conductivity (S m"^"-1"*")"))) + 
+  guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title=expression("Conductivity (S m"^"-1"*")"))) + 
   scale_x_continuous(labels = NULL)
 
 # Density plot
@@ -156,7 +156,7 @@ pDensity <- ggplot() +
   scale_fill_cmocean(name = "dense") + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("Density (kg m"^"-3"*")"))) + 
+  guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title=expression("Density (kg m"^"-3"*")"))) + 
   scale_x_continuous(labels = NULL) +
   geom_smooth(data=tidy_MLD, aes(Time,Pressure_rho), method="loess", se=FALSE, span=0.1, colour="white") 
 # could add dots for individual profiles but this clutters the plot
@@ -170,7 +170,7 @@ pDescent_Rate <- ggplot(tidy_SH, aes(Time, Pressure)) +
   scale_fill_cmocean(name = "speed", limits=c(-0.3,0)) + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("Descent Rate (m s"^"-1"*")"))) + 
+  guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title=expression("Descent Rate (m s"^"-1"*")"))) + 
   scale_x_continuous(labels = NULL)
 
 # Fluorescence plot
@@ -179,7 +179,7 @@ pFluorescence <- ggplot(tidy_SH, aes(Time, Pressure)) +
   scale_fill_cmocean(name = "algae") + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("Chlorophyll (mg m"^"-3"*")"))) + 
+  guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title=expression("Chlorophyll (mg m"^"-3"*")"))) + 
   scale_x_continuous(labels = NULL)
 
 # O2_Percent_Sat plot
@@ -188,15 +188,15 @@ pO2_Percent_Sat <- ggplot(tidy_SH, aes(Time, Pressure)) +
   scale_fill_cmocean(name = "dense", limits=c(65,105)) + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("O2_Percent_Sat")))
+  guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title=expression("O2_Percent_Sat")))
 
 # O2_Concentration plot
 pO2_Concentration <- ggplot(tidy_SH, aes(Time, Pressure)) + 
   geom_tile(aes(fill = O2_Concentration)) + 
-  scale_fill_cmocean(name = "dense", limits=c(5.5,8.5)) + 
+  scale_fill_cmocean(name = "dense", limits=c(5.5,8.5), breaks = c(5.5, 6.5, 7.5, 8.5)) + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("Oxygen (mL L"^"-1"*")")))
+  guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title=expression("Oxygen (mL L"^"-1"*")")))
 
 # Potential_Temperature plot
 pPotential_Temperature <- ggplot(tidy_SH, aes(Time, Pressure)) + 
@@ -204,15 +204,15 @@ pPotential_Temperature <- ggplot(tidy_SH, aes(Time, Pressure)) +
   scale_fill_cmocean(name = "thermal") + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("Potential_Temperature (\u00B0C)")))
+  guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title=expression("Potential_Temperature (\u00B0C)")))
 
 # Salinity plot
 pSalinity <- ggplot(tidy_SH, aes(Time, Pressure)) + 
   geom_tile(aes(fill = Salinity)) + 
-  scale_fill_cmocean(name = "haline") + 
+  scale_fill_cmocean(name = "haline", limits=c(34.25,34.55), breaks = c(34.25, 34.35, 34.45, 34.55)) + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("Salinity        "))) + 
+  guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title=expression("Salinity"))) + 
   scale_x_continuous(labels = NULL)
 
 # Sound_Velocity plot
@@ -221,7 +221,7 @@ pSound_Velocity <- ggplot(tidy_SH, aes(Time, Pressure)) +
   scale_fill_cmocean(name = "speed") + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("Sound_Velocity (m s"^"-1"*")"))) + 
+  guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title=expression("Sound_Velocity (m s"^"-1"*")"))) + 
   scale_x_continuous(labels = NULL)
 
 # Buoyancy_Freq_2 plot
@@ -230,7 +230,7 @@ pBuoyancy_Freq_2 <- ggplot(tidy_SH, aes(Time, Pressure)) +
   scale_fill_cmocean(name = "dense") + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("Buoyancy_Freq_Sqrd (rad"^2*"s"^"-1"*")")))
+  guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title=expression("Buoyancy_Freq_Sqrd (rad"^2*"s"^"-1"*")")))
 
 # Buoyancy_Freq plot
 pBuoyancy_Freq <- ggplot(tidy_SH, aes(Time, Pressure)) + 
@@ -238,12 +238,13 @@ pBuoyancy_Freq <- ggplot(tidy_SH, aes(Time, Pressure)) +
   scale_fill_cmocean(name = "dense") + 
   scale_y_reverse() + 
   labs(x=NULL,y="Depth (m)") + 
-  guides(fill = guide_colourbar(title=expression("Buoyancy_Freq (cycles h"^"-1"*")")))
+  guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title=expression("Buoyancy_Freq (cycles h"^"-1"*")")))
 
 # facet plot using patchwork package
 pTmp/pSalinity/pDensity/pFluorescence/pO2_Concentration
 
 # save plot
-ggsave(filename = "SH_CTD.png", device = "png", scale = 1.5, width = 6, height = 10, units = "in", dpi = 1200)
+#ggsave(filename = "SH_CTD.png", device = "png", scale = 1.5, width = 6, height = 10, units = "in", dpi = 1200)
+ggsave(filename = "SH_CTD.png", device = "png", scale = 1, width = 6, height = 6, units = "in", dpi = 1200)
 
 
