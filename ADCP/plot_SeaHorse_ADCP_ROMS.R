@@ -212,26 +212,34 @@ model_north <- ggplot(tide_v_tibble, aes(Time, North)) +
 tidy_east_summary <- tidy_east_long_clipped %>% group_by(DateTime) %>% summarise(avg = mean(East, na.rm = TRUE))
 tidy_north_summary <- tidy_north_long_clipped %>% group_by(DateTime) %>% summarise(avg = mean(North, na.rm = TRUE))
 
+# Add the ROMS model output at the SeaHorse mooring site
+date_start <- ymd_hms("2012-01-21 04:00:00")  #UTC
+ROMS_vel <- read_csv("ROMS_velocity.csv", col_names = c("time_inc","East","North"))
+ROMS_vel$time_inc <- date_start + seconds(ROMS_vel$time_inc)
+
+
 ####### Plots of the depth-averaged velocity data ##################
 compare_east <- ggplot() + 
   geom_line(data=tidy_east_summary, aes(DateTime,avg, color="red")) + 
   geom_line(data=tide_u_tibble, aes(Time, East, color="blue")) + 
+  geom_line(data=ROMS_vel, aes(time_inc, East, color="green")) + 
   labs(x=NULL,y="East (m/s)") + 
-  scale_color_discrete(name=NULL, labels=c("Model","ADCP")) + 
+  scale_color_discrete(name=NULL, labels=c("Tidal Model","ROMS","ADCP")) + 
   scale_x_datetime(limits = c(as.POSIXct("2012-01-21 00:00:00"),as.POSIXct("2012-01-27 00:00:00"))) +
   theme(axis.text.x = element_blank())  # remove labels on tick marks
 
 compare_north <- ggplot() + 
   geom_line(data=tidy_north_summary, aes(DateTime,avg, color="red")) + 
   geom_line(data=tide_v_tibble, aes(Time, North, color="blue")) + 
+  geom_line(data=ROMS_vel, aes(time_inc, North, color="green")) + 
   labs(x=NULL,y="North (m/s)") + 
-  scale_color_discrete(name=NULL, labels=c("Model","ADCP")) + 
+  scale_color_discrete(name=NULL, labels=c("Tidal Model","ROMS","ADCP")) + 
   scale_x_datetime(limits = c(as.POSIXct("2012-01-21 00:00:00"),as.POSIXct("2012-01-27 00:00:00")))
 
 # Use patchwork to plot results
 dev.new()
 compare_east/compare_north
-ggsave(filename = "ADCP_model.png", device = "png", scale = 1.5, width = 6, height = 6, units = "in", dpi = 1200)
+ggsave(filename = "SH_ADCP_ROMS.png", device = "png", scale = 1.5, width = 6, height = 4, units = "in", dpi = 1200)
 dev.off()
 
 ############# Need to add a section on vertical shear
