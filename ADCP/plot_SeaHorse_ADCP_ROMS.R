@@ -27,6 +27,7 @@ library(patchwork)
 #decl5 <- 117.59
 #decl6 <- 117.59
 
+setwd("C:/Science Projects/Ross Sea/Documents/Papers/Ross Bank/Figures/Mooring/ADCP")
 # Extract data from the downward looking ADCP on the SeaHorse mooring using the oce package
 DPL5 <- read.oce(file="DPL5_000.000")
 # Serial number 9184 is downward looking as per logsheet - the mix of upward and downward is because there are profiles before and after the mooring was deployed (i.e., on deck) that are included in the data file.
@@ -222,8 +223,9 @@ ROMS_vel$time_inc <- date_start + seconds(ROMS_vel$time_inc)
 compare_east <- ggplot() + 
   geom_line(data=tidy_east_summary, aes(DateTime,avg, color="red")) + 
   geom_line(data=tide_u_tibble, aes(Time, East, color="blue")) + 
-  geom_line(data=ROMS_vel, aes(time_inc, East, color="green")) + 
-  labs(x=NULL,y="East (m/s)") + 
+  geom_line(data=ROMS_vel, aes(time_inc, East, color="green")) +
+  labs(x=NULL,y="East (m/s)") +
+  ylim(-0.5, 0.5) +
   scale_color_discrete(name=NULL, labels=c("Tidal Model","ROMS","ADCP")) + 
   scale_x_datetime(limits = c(as.POSIXct("2012-01-21 00:00:00"),as.POSIXct("2012-01-27 00:00:00"))) +
   theme(axis.text.x = element_blank())  # remove labels on tick marks
@@ -233,13 +235,14 @@ compare_north <- ggplot() +
   geom_line(data=tide_v_tibble, aes(Time, North, color="blue")) + 
   geom_line(data=ROMS_vel, aes(time_inc, North, color="green")) + 
   labs(x=NULL,y="North (m/s)") + 
+  ylim(-0.5, 0.5) +
   scale_color_discrete(name=NULL, labels=c("Tidal Model","ROMS","ADCP")) + 
   scale_x_datetime(limits = c(as.POSIXct("2012-01-21 00:00:00"),as.POSIXct("2012-01-27 00:00:00")))
 
 # Use patchwork to plot results
 dev.new()
 compare_east/compare_north
-ggsave(filename = "SH_ADCP_ROMS.png", device = "png", scale = 1.5, width = 6, height = 4, units = "in", dpi = 1200)
+ggsave(filename = "SH_ADCP_ROMS2.png", device = "png", scale = 1.5, width = 6, height = 4, units = "in", dpi = 1200)
 dev.off()
 
 ############# Need to add a section on vertical shear
