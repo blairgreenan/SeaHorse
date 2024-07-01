@@ -242,7 +242,7 @@ compare_north <- ggplot() +
 # Use patchwork to plot results
 dev.new()
 compare_east/compare_north
-ggsave(filename = "SH_ADCP_ROMS2.png", device = "png", scale = 1.5, width = 6, height = 4, units = "in", dpi = 1200)
+ggsave(filename = "SH_ADCP_ROMS3.png", device = "png", scale = 1, width = 6, height = 3, units = "in", dpi = 1200)
 dev.off()
 
 ############# Need to add a section on vertical shear
