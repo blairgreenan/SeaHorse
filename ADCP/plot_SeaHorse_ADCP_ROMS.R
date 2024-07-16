@@ -223,8 +223,8 @@ ROMS_vel$time_inc <- date_start + seconds(ROMS_vel$time_inc)
 compare_east <- ggplot() + 
   geom_line(data=tidy_east_summary, aes(DateTime,avg, color="red")) + 
   geom_line(data=tide_u_tibble, aes(Time, East, color="blue")) + 
-  geom_line(data=ROMS_vel, aes(time_inc, East, color="green")) +
-  labs(x=NULL,y="East (m/s)") +
+  geom_line(data=ROMS_vel, aes(time_inc, East, color="black")) +
+  labs(x=NULL,y=expression(paste("East (m ", s^-1, ")"))) +
   ylim(-0.5, 0.5) +
   scale_color_discrete(name=NULL, labels=c("Tidal Model","ROMS","ADCP")) + 
   scale_x_datetime(limits = c(as.POSIXct("2012-01-21 00:00:00"),as.POSIXct("2012-01-27 00:00:00"))) +
@@ -233,8 +233,8 @@ compare_east <- ggplot() +
 compare_north <- ggplot() + 
   geom_line(data=tidy_north_summary, aes(DateTime,avg, color="red")) + 
   geom_line(data=tide_v_tibble, aes(Time, North, color="blue")) + 
-  geom_line(data=ROMS_vel, aes(time_inc, North, color="green")) + 
-  labs(x=NULL,y="North (m/s)") + 
+  geom_line(data=ROMS_vel, aes(time_inc, North, color="black")) + 
+  labs(x=NULL,y=expression(paste("North (m ", s^-1, ")"))) +
   ylim(-0.5, 0.5) +
   scale_color_discrete(name=NULL, labels=c("Tidal Model","ROMS","ADCP")) + 
   scale_x_datetime(limits = c(as.POSIXct("2012-01-21 00:00:00"),as.POSIXct("2012-01-27 00:00:00")))
@@ -242,7 +242,7 @@ compare_north <- ggplot() +
 # Use patchwork to plot results
 dev.new()
 compare_east/compare_north
-ggsave(filename = "SH_ADCP_ROMS3.png", device = "png", scale = 1, width = 6, height = 3, units = "in", dpi = 1200)
+ggsave(filename = "SH_ADCP_ROMS_16Jul2024.png", device = "png", scale = 1, width = 6, height = 3, units = "in", dpi = 1200)
 dev.off()
 
 ############# Need to add a section on vertical shear
