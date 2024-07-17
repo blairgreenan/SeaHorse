@@ -223,10 +223,10 @@ ROMS_vel$time_inc <- date_start + seconds(ROMS_vel$time_inc)
 compare_east <- ggplot() + 
   geom_line(data=tidy_east_summary, aes(DateTime,avg, color="red")) + 
   geom_line(data=tide_u_tibble, aes(Time, East, color="blue")) + 
-  geom_line(data=ROMS_vel, aes(time_inc, East, color="green")) +
+  geom_line(data=ROMS_vel, aes(time_inc, East, color="black")) +
   labs(x=NULL,y=expression(paste("East (m ", s^-1, ")"))) +
   ylim(-0.5, 0.5) +
-  scale_color_discrete(name=NULL, labels=c("Tidal Model","ROMS","ADCP")) + 
+  scale_color_manual(name=NULL, labels=c("ROMS","Tidal Model","ADCP"), values = c("black", "red", "blue")) + 
   scale_x_datetime(limits = c(as.POSIXct("2012-01-21 00:00:00"),as.POSIXct("2012-01-27 00:00:00"))) +
   theme(axis.text.x = element_blank())  # remove labels on tick marks
 
@@ -236,7 +236,7 @@ compare_north <- ggplot() +
   geom_line(data=ROMS_vel, aes(time_inc, North, color="black")) + 
   labs(x=NULL,y=expression(paste("North (m ", s^-1, ")"))) +
   ylim(-0.5, 0.5) +
-  scale_color_discrete(name=NULL, labels=c("Tidal Model","ROMS","ADCP"), values = c("red", "black", "blue")) + 
+  scale_color_manual(name=NULL, labels=c("ROMS","Tidal Model","ADCP"), values = c("black", "red", "blue")) + 
   scale_x_datetime(limits = c(as.POSIXct("2012-01-21 00:00:00"),as.POSIXct("2012-01-27 00:00:00")))
 
 # Use patchwork to plot results
